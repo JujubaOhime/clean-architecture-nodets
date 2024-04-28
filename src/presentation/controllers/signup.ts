@@ -4,7 +4,7 @@ import { badRequest } from '../helpers/http-helper'
 export class SignUpController {
   // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
   handle (httpRequest: HttpRequest): HttpResponse {
-    const requiredFields = ['name', 'email']
+    const requiredFields = ['name', 'email', 'password']
     requiredFields.forEach(field => {
       if (!httpRequest.body[field]) {
         return badRequest(new MissingParamError(field))
