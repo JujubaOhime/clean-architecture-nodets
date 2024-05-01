@@ -2,19 +2,32 @@ import { type HttpResponse, type HttpRequest } from '../protocols/http'
 import { MissingParamError } from '../errors/missing-param-error'
 import { badRequest } from '../helpers/http-helper'
 import { type Controller } from '../protocols/controller'
+import { type EmailValidator } from '../protocols/email-validator'
+import { InvalidParamError } from '../errors/invalid-param-error'
 export class SignUpController implements Controller {
-  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+  private readonly emailValidator: EmailValidator
+
+  constructor (emailValidator: EmailValidator) {
+    this.emailValidator = emailValidator
+  }
+
   handle (httpRequest: HttpRequest): HttpResponse {
     const requiredFields = ['name', 'email', 'password', 'passwordConfirmation']
-    requiredFields.forEach(field => {
+    for (const field of requiredFields) {
       if (!httpRequest.body[field]) {
         return badRequest(new MissingParamError(field))
       }
-    })
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const isEmailValid = this.emailValidator.isValid(httpRequest.body.email)
+    if (!isEmailValid) {
+      return badRequest(new InvalidParamError('email'))
+    }
 
     return {
-      body: {},
-      statusCode: 200
+      statusCode: 200,
+      body: {}
     }
   }
 }
