@@ -19,8 +19,7 @@ export class SignUpController implements Controller {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const isEmailValid = this.emailValidator.isValid(httpRequest.body.email)
+    const isEmailValid = this.emailValidator.isValid(httpRequest.body.email as string)
     if (!isEmailValid) {
       return badRequest(new InvalidParamError('email'))
     }
