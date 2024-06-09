@@ -1,15 +1,12 @@
 import { type HttpResponse, type HttpRequest } from '../protocols/http'
 import { badRequest, serverError } from '../helpers/http-helper'
 import { InvalidParamError, MissingParamError } from '../errors'
-import { type Controller, type EmailValidator } from '../protocols'
+import { type Controller } from '../protocols'
+import { User } from '../../0.domain/entities/user.entity'
 
 export class SignUpController implements Controller {
-  private readonly emailValidator: EmailValidator
-
-  constructor (emailValidator: EmailValidator) {
-    this.emailValidator = emailValidator
-  }
-
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor () {}
   handle (httpRequest: HttpRequest): HttpResponse {
     try {
       const requiredFields = ['name', 'email', 'password', 'passwordConfirmation']
@@ -19,14 +16,22 @@ export class SignUpController implements Controller {
         }
       }
 
-      const isEmailValid = this.emailValidator.isValid(httpRequest.body.email as string)
-      if (!isEmailValid) {
-        return badRequest(new InvalidParamError('email'))
+      const { name, email, password, passwordConfirmation } = httpRequest.body
+      if (password !== passwordConfirmation) {
+        return badRequest(new InvalidParamError('passwordConfirmation'))
       }
+
+      const user = User.createUser({
+        name,
+        email,
+        password
+      })
+
+      console.log({ user })
 
       return {
         statusCode: 200,
-        body: {}
+        body: { user }
       }
     } catch {
       return serverError()
